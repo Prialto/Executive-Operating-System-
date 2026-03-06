@@ -36,6 +36,8 @@
   .tab{padding:8px 14px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;color:#555;transition:all .2s}
   .tab.active{background:#00b5ad;border-color:#00b5ad;color:#fff}
   .tab:hover:not(.active){border-color:#00b5ad;color:#00b5ad}
+  .tab::after{content:' ✗';color:#e05555;font-weight:700}
+  .tab.active::after{color:#ffaaaa}
   .tab.done::after{content:' ✓';color:#00b5ad}
   .tab.active.done::after{color:#fff}
 
@@ -479,7 +481,7 @@
 </div>
 <footer>
   <span>📞 <a href="tel:5038369499">(503) 836-9499</a></span>
-  <span>🌐 <a href="#">https://www.prialto.com/</a></span>
+  <span>🌐 <a href="#">prialto.com</a></span>
   <span>✉️ <a href="#">sales@prialto.com</a></span>
   <span>🔗 <a href="#">linkedin.com/company/prialto</a></span>
 </footer>
@@ -523,13 +525,33 @@ $('gateName').addEventListener('keydown', e => { if(e.key==='Enter') $('gateEmai
 $('gateEmail').addEventListener('keydown', e => { if(e.key==='Enter') submitGate(); });
 
 /* ---- TABS ---- */
+function checkTabComplete(idx) {
+  if (idx === 0) {
+    return document.querySelectorAll('#p1 .check-item input:checked').length > 0;
+  } else if (idx === 1) {
+    return ['ac1','ac2','ac3','ac4','ac5','ac6'].every(n => document.querySelector(`input[name="${n}"]:checked`));
+  } else if (idx === 2) {
+    return ['q1','q2','q3','q4','q5','q6'].every(n => document.querySelector(`input[name="${n}"]:checked`));
+  } else if (idx === 3) {
+    return statements.every(s => document.querySelector(`input[name="${s.id}"]:checked`));
+  }
+  return false;
+}
+
+function updateTabStatus() {
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach((t, i) => {
+    if (checkTabComplete(i)) { t.classList.add('done'); }
+    else { t.classList.remove('done'); }
+  });
+}
+
 function showPage(id, btn, idx) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   $(id).classList.add('active');
   btn.classList.add('active');
-  tabDone[idx] = true;
-  if(!btn.classList.contains('done')) btn.classList.add('done');
+  updateTabStatus();
 }
 
 /* ---- CALC ---- */
@@ -545,13 +567,14 @@ function calc() {
   $('s-tasks').textContent = document.querySelectorAll('#p1 .check-item input:checked').length;
 }
 document.querySelectorAll('#p1 .check-item').forEach(item => {
-  item.addEventListener('change', () => { item.classList.toggle('checked', item.querySelector('input').checked); calc(); });
+  item.addEventListener('change', () => { item.classList.toggle('checked', item.querySelector('input').checked); calc(); updateTabStatus(); });
 });
 ['adminHours','hourlyRate','reduction'].forEach(id => { $(id).addEventListener('input', calc); $(id).addEventListener('change', calc); });
 
 /* ---- ADMIN COMPLEXITY ---- */
 function scoreComplexity() {
   const names = ['ac1','ac2','ac3','ac4','ac5','ac6'];
+  updateTabStatus();
   if (names.filter(n => document.querySelector(`input[name="${n}"]:checked`)).length < names.length) return;
   let score = 0; const maxPerQ = [3,4,4,4,4,4]; let maxScore = 0;
   names.forEach((n,i) => { const s = document.querySelector(`input[name="${n}"]:checked`); if(s) score += +s.value; maxScore += maxPerQ[i]; });
@@ -569,6 +592,7 @@ document.querySelectorAll('#p2 input[type=radio]').forEach(r => r.addEventListen
 
 /* ---- DELEGATION STYLE ---- */
 function scoreDelegation() {
+  updateTabStatus();
   if(['q1','q2','q3','q4','q5','q6'].filter(n=>document.querySelector(`input[name="${n}"]:checked`)).length < 6) return;
   let score=0;
   ['q1','q2','q3','q4','q5','q6'].forEach(n=>document.querySelectorAll(`input[name="${n}"]`).forEach((o,i)=>{if(o.checked)score+=i;}));
@@ -602,6 +626,7 @@ statements.forEach(s=>{
   sc.appendChild(div);
 });
 function scoreReadiness(){
+  updateTabStatus();
   if(statements.filter(s=>document.querySelector(`input[name="${s.id}"]:checked`)).length<statements.length) return;
   let score=0;
   statements.forEach(s=>{const sel=document.querySelector(`input[name="${s.id}"]:checked`);if(sel)score+=+sel.value;});
