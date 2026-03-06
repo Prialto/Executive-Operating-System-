@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Prialto – Assessment Tool</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',sans-serif;background:#1a2a3a;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+
+  header{width:100%;background:#fff;padding:14px 40px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #00b5ad;flex-wrap:wrap;gap:10px}
+  .logo{font-size:1.4rem;font-weight:800;color:#1a2a3a}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tab{padding:8px 14px;border-radius:20px;border:2px solid #ddd;background:#fff;cursor:pointer;font-size:0.75rem;font-weight:600;color:#555;transition:all .2s}
+  .tab.active{background:#00b5ad;border-color:#00b5ad;color:#fff}
+  .tab:hover:not(.active){border-color:#00b5ad;color:#00b5ad}
+
+  .page{display:none;width:100%}
+  .page.active{display:block}
+
+  .hero{width:100%;padding:40px;display:flex;justify-content:space-between;align-items:center;gap:24px}
+  .hero-1{background:linear-gradient(135deg,#1a2a3a 60%,#0e3a4a)}
+  .hero-2{background:linear-gradient(135deg,#1e2a4a 60%,#0e1a3a)}
+  .hero-3{background:linear-gradient(135deg,#1e3a5a 60%,#0e2a4a)}
+  .hero-4{background:linear-gradient(135deg,#1a3040 60%,#0a2535)}
+  .hero-text h1{font-size:2rem;font-weight:800;color:#fff;line-height:1.2;max-width:480px}
+  .hero-text h1 span{color:#00b5ad}
+  .hero-text p{color:#a0b8c8;margin-top:10px;max-width:440px;font-size:0.9rem;line-height:1.6}
+  .hero-icon svg{width:110px;height:90px}
+
+  .card{background:#fff;border-radius:12px;max-width:860px;width:calc(100% - 48px);margin:28px auto;box-shadow:0 8px 40px rgba(0,0,0,.3);overflow:hidden}
+  .card-header{background:#1a8a85;color:#fff;text-align:center;padding:16px;font-size:1rem;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+
+  .calc-row{display:flex;flex-wrap:wrap;gap:12px;padding:24px;background:#f0fafa;border-bottom:1px solid #d0e8e8}
+  .calc-field{flex:1;min-width:110px}
+  .calc-field label{display:block;font-size:0.68rem;font-weight:600;color:#555;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+  .calc-field input,.calc-field select{width:100%;border:1px solid #c0d8d8;border-radius:6px;padding:8px 10px;font-size:0.9rem;color:#1a2a3a;background:#fff;outline:none;transition:border .2s}
+  .calc-field input:focus,.calc-field select:focus{border-color:#00b5ad}
+  .result-box{background:#00b5ad;color:#fff;border-radius:8px;padding:8px 14px;font-weight:700;font-size:1.05rem;min-height:38px;display:flex;align-items:center;justify-content:center;margin-top:20px}
+
+  .section{padding:20px 24px}
+  .section+.section{border-top:1px solid #eee}
+  .section-title{background:#2a9a90;color:#fff;text-align:center;padding:9px;border-radius:6px;font-weight:700;font-size:0.88rem;letter-spacing:.5px;margin-bottom:14px;text-transform:uppercase}
+
+  .checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:9px}
+  .check-item{display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px 10px;border-radius:6px;border:1.5px solid #ddd;transition:all .2s;background:#fafafa}
+  .check-item:hover{border-color:#00b5ad;background:#f0fafa}
+  .check-item.checked{border-color:#00b5ad;background:#e0f7f6}
+  .check-item input{accent-color:#00b5ad;width:15px;height:15px;cursor:pointer;flex-shrink:0}
+  .check-item span{font-size:0.8rem;color:#333;font-weight:500}
+
+  .summary{background:#f0fafa;border-radius:10px;padding:18px;margin:0 24px 24px;border:1px solid #c0e8e8}
+  .summary h3{color:#1a8a85;font-size:.95rem;margin-bottom:12px;font-weight:700}
+  .summary-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .summary-item{background:#fff;border-radius:8px;padding:12px;text-align:center;border:1px solid #d0e8e8}
+  .summary-item .val{font-size:1.3rem;font-weight:800;color:#00b5ad}
+  .summary-item .lbl{font-size:0.68rem;color:#777;margin-top:3px;text-transform:uppercase;letter-spacing:.4px}
+
+  .dark-section{background:#1e3040;padding:20px 24px}
+  .dark-section .section-title{background:#1a7a75}
+  .instr{background:#243548;border-radius:8px;padding:14px 18px;margin-bottom:18px;font-size:0.85rem;color:#a0c0d0;line-height:1.6;border-left:3px solid #00b5ad}
+  .instr strong{color:#d0e8f0;display:block;margin-bottom:4px}
+
+  .q-card{background:#2a3f55;border-radius:8px;padding:18px 20px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  .q-card.highlighted{border:2px solid #7b5ea7}
+  .q-left{flex:1;min-width:180px}
+  .q-label{font-size:0.78rem;font-weight:700;color:#00c8c0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .q-text{font-size:0.85rem;color:#d0e8f0;line-height:1.5}
+  .q-right{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;flex:1;min-width:200px}
+  .q-option{display:flex;align-items:center;gap:7px;cursor:pointer}
+  .q-option input[type=radio]{accent-color:#00b5ad;width:14px;height:14px;flex-shrink:0}
+  .q-option span{font-size:0.8rem;color:#d0e8f0}
+
+  .s-card{background:#2a3f55;border-radius:8px;padding:18px 20px;margin-bottom:12px;display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+  .s-left{flex:1;min-width:180px}
+  .s-label{font-size:0.78rem;font-weight:700;color:#00c8c0;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .s-text{font-size:0.85rem;color:#d0e8f0;line-height:1.5}
+  .s-right{display:grid;grid-template-columns:1fr 1fr;gap:6px 18px;flex:1;min-width:200px}
+  .s-option{display:flex;align-items:center;gap:7px;cursor:pointer}
+  .s-option input[type=radio]{accent-color:#00b5ad;width:14px;height:14px;flex-shrink:0}
+  .s-option span{font-size:0.8rem;color:#d0e8f0}
+
+  .score-area{background:#f0fafa;border-radius:10px;padding:18px;margin:0 24px 24px;border:1px solid #c0e8e8}
+  .score-area h3{color:#1a8a85;font-size:.95rem;margin-bottom:14px;font-weight:700}
+  .score-bar-wrap{background:#ddd;border-radius:20px;height:22px;overflow:hidden;margin-bottom:8px}
+  .score-bar{height:100%;background:linear-gradient(90deg,#00b5ad,#1a8a85);border-radius:20px;transition:width .5s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:8px}
+  .score-bar span{font-size:0.72rem;color:#fff;font-weight:700}
+  .score-label{font-size:0.78rem;color:#555;margin-bottom:10px}
+  .score-result{background:#fff;border:1px solid #d0e8e8;border-radius:8px;padding:12px 16px;font-size:0.85rem;color:#1a2a3a;line-height:1.6}
+  .score-result strong{color:#1a8a85}
+
+  .cta{background:linear-gradient(135deg,#1a8a85,#0e5a58);padding:28px;text-align:center;width:100%}
+  .cta h2{color:#fff;font-size:1.2rem;margin-bottom:6px}
+  .cta p{color:#a0d8d5;font-size:0.85rem;margin-bottom:18px}
+  .cta-btn{background:#fff;color:#1a8a85;font-weight:700;padding:11px 32px;border-radius:30px;border:none;font-size:.95rem;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+  .cta-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.25)}
+
+  footer{background:#0e1e2e;color:#6a8a9a;font-size:0.75rem;padding:14px 40px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;width:100%}
+  footer a{color:#00b5ad;text-decoration:none}
+
+  @media(max-width:600px){
+    .hero{flex-direction:column;padding:24px 20px}.hero-icon{display:none}
+    .q-right,.s-right{grid-template-columns:1fr}
+    header{padding:12px 16px}
+    .tabs .tab{font-size:0.68rem;padding:6px 10px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">prialto</div>
+  <div class="tabs">
+    <button class="tab active" onclick="showPage('p1',this)">💰 Cost Calculator</button>
+    <button class="tab" onclick="showPage('p2',this)">⚙️ Admin Complexity</button>
+    <button class="tab" onclick="showPage('p3',this)">🤝 Delegation Style</button>
+    <button class="tab" onclick="showPage('p4',this)">✅ Delegation Readiness</button>
+  </div>
+</header>
+
+<!-- ===== PAGE 1: COST CALCULATOR ===== -->
+<div class="page active" id="p1">
+  <div class="hero hero-1">
+    <div class="hero-text">
+      <h1>Productivity & <span>Cost Analysis</span> Calculator</h1>
+      <p>Fill out the calculator to assess time spent on administrative tasks and estimate your potential cost savings with a Prialto managed assistant.</p>
+    </div>
+    <div class="hero-icon">
+      <svg viewBox="0 0 120 100" fill="none">
+        <rect x="5" y="60" width="18" height="35" rx="3" fill="#00b5ad" opacity=".5"/>
+        <rect x="30" y="45" width="18" height="50" rx="3" fill="#00b5ad" opacity=".65"/>
+        <rect x="55" y="28" width="18" height="67" rx="3" fill="#00b5ad" opacity=".8"/>
+        <rect x="80" y="10" width="18" height="85" rx="3" fill="#00b5ad"/>
+        <polyline points="14,62 39,47 64,30 89,12" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="89" cy="12" r="4" fill="#fff"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">⚙️ Prialto Cost Calculator</div>
+    <div class="calc-row">
+      <div class="calc-field">
+        <label>Weekly Admin Hours</label>
+        <select id="adminHours">
+          <option>5</option><option>10</option><option>15</option>
+          <option selected>20</option><option>25</option><option>30</option><option>40</option>
+        </select>
+      </div>
+      <div class="calc-field">
+        <label>Hourly Rate ($)</label>
+        <input id="hourlyRate" type="number" value="20" min="1"/>
+      </div>
+      <div class="calc-field">
+        <label>Monthly Cost ($)</label>
+        <input id="monthlyCost" type="number" readonly style="background:#f5f5f5;color:#888"/>
+      </div>
+      <div class="calc-field">
+        <label>% Reduction</label>
+        <select id="reduction">
+          <option>20%</option><option>30%</option><option selected>40%</option>
+          <option>50%</option><option>60%</option><option>70%</option>
+        </select>
+      </div>
+      <div class="calc-field">
+        <label>Annual Savings ($)</label>
+        <div class="result-box" id="annualSavings">$0</div>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Core Process of Support</div>
+      <div class="checks">
+        <label class="check-item"><input type="checkbox"><span>Calendar</span></label>
+        <label class="check-item"><input type="checkbox"><span>Expense Management</span></label>
+        <label class="check-item"><input type="checkbox"><span>Inbox</span></label>
+        <label class="check-item"><input type="checkbox"><span>CRM Management</span></label>
+        <label class="check-item"><input type="checkbox"><span>Travel</span></label>
+      </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Additional Areas of Support Needed</div>
+      <div class="checks">
+        <label class="check-item"><input type="checkbox"><span>Meeting Invitations</span></label>
+        <label class="check-item"><input type="checkbox"><span>Travel Management</span></label>
+        <label class="check-item"><input type="checkbox"><span>Expense Management</span></label>
+        <label class="check-item"><input type="checkbox"><span>Prospect Research</span></label>
+        <label class="check-item"><input type="checkbox"><span>Task Management</span></label>
+        <label class="check-item"><input type="checkbox"><span>Email Management</span></label>
+        <label class="check-item"><input type="checkbox"><span>Document Support</span></label>
+        <label class="check-item"><input type="checkbox"><span>Reporting & Analytics</span></label>
+        <label class="check-item"><input type="checkbox"><span>Custom Task Support</span></label>
+        <label class="check-item"><input type="checkbox"><span>Invoice & Billing Support</span></label>
+        <label class="check-item"><input type="checkbox"><span>Social Media & LinkedIn</span></label>
+        <label class="check-item"><input type="checkbox"><span>Blog & Content Management</span></label>
+        <label class="check-item"><input type="checkbox"><span>Client Onboarding & Offboarding</span></label>
+        <label class="check-item"><input type="checkbox"><span>Recurring Meeting & Agenda Mgmt</span></label>
+        <label class="check-item"><input type="checkbox"><span>Data Entry & System Updates</span></label>
+        <label class="check-item"><input type="checkbox"><span>Vendor & Contact Management</span></label>
+        <label class="check-item"><input type="checkbox"><span>Event & Webinar Coordination</span></label>
+        <label class="check-item"><input type="checkbox"><span>Compliance & Policy Support</span></label>
+      </div>
+    </div>
+    <div class="summary">
+      <h3>📊 Your Summary</h3>
+      <div class="summary-grid">
+        <div class="summary-item"><div class="val" id="s-hours">20</div><div class="lbl">Weekly Admin Hrs</div></div>
+        <div class="summary-item"><div class="val" id="s-monthly">$0</div><div class="lbl">Monthly Admin Cost</div></div>
+        <div class="summary-item"><div class="val" id="s-annual">$0</div><div class="lbl">Annual Savings</div></div>
+        <div class="summary-item"><div class="val" id="s-tasks">0</div><div class="lbl">Areas Selected</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 2: ADMIN COMPLEXITY ===== -->
+<div class="page" id="p2">
+  <div class="hero hero-2">
+    <div class="hero-text">
+      <h1>Administrative <span>Complexity</span></h1>
+      <p>Select the option that best reflects your current administrative environment.</p>
+    </div>
+    <div class="hero-icon">
+      <svg viewBox="0 0 120 100" fill="none">
+        <rect x="10" y="20" width="40" height="30" rx="4" stroke="#00b5ad" stroke-width="2" fill="none" opacity=".6"/>
+        <rect x="70" y="20" width="40" height="30" rx="4" stroke="#00b5ad" stroke-width="2" fill="none" opacity=".6"/>
+        <rect x="40" y="65" width="40" height="25" rx="4" fill="#00b5ad" opacity=".8"/>
+        <line x1="30" y1="50" x2="60" y2="65" stroke="#00b5ad" stroke-width="2" opacity=".5"/>
+        <line x1="90" y1="50" x2="60" y2="65" stroke="#00b5ad" stroke-width="2" opacity=".5"/>
+        <circle cx="30" cy="35" r="5" fill="#00b5ad" opacity=".7"/>
+        <circle cx="90" cy="35" r="5" fill="#00b5ad" opacity=".7"/>
+        <circle cx="60" cy="77" r="5" fill="#fff" opacity=".9"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">⚙️ Administrative Complexity</div>
+    <div class="dark-section">
+      <div class="instr"><strong>Instructions</strong>Select the option that best reflects your current administrative environment.</div>
+
+      <div class="q-card">
+        <div class="q-left">
+          <div class="q-label">Question 1</div>
+          <div class="q-text">How many tools or platforms are used for administrative work?</div>
+        </div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="ac1" value="0"><span>1–2</span></label>
+          <label class="q-option"><input type="radio" name="ac1" value="1"><span>3–4</span></label>
+          <label class="q-option"><input type="radio" name="ac1" value="2"><span>5–6</span></label>
+          <label class="q-option"><input type="radio" name="ac1" value="3"><span>7+</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left">
+          <div class="q-label">Question 2</div>
+          <div class="q-text">How often is the same information entered into more than one system?</div>
+        </div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="ac2" value="0"><span>Never</span></label>
+          <label class="q-option"><input type="radio" name="ac2" value="1"><span>Rarely</span></label>
+          <label class="q-option"><input type="radio" name="ac2" value="2"><span>Sometimes</span></label>
+          <label class="q-option"><input type="radio" name="ac2" value="3"><span>Often</span></label>
+          <label class="q-option"><input type="radio" name="ac2" value="4"><span>Constantly</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left">
+          <div class="q-label">Question 3</div>
+          <div class="q-text">On a typical week, how would you describe the volume of administrative tasks?</div>
+        </div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="ac3" value="0"><span>Very Low</span></label>
+          <label class="q-option"><input type="radio" name="ac3" value="1"><span>Low</span></label>
+          <label class="q-option"><input type="radio" name="ac3" value="2"><span>Moderate</span></label>
+          <label class="q-option"><input type="radio" name="ac3" value="3"><span>High</span></label>
+          <label class="q-option"><input type="radio" name="ac3" value="4"><span>Very High</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left">
+          <div class="q-label">Question 4</div>
+          <div class="q-text">How standardized are your administrative processes?</div>
+        </div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="ac4" value="0"><span>Fully standardized</span></label>
+          <label class="q-option"><input type="radio" name="ac4" value="1"><span>Mostly standardized</span></label>
+          <label class="q-option"><input type="radio" name="ac4" value="2"><span>Somewhat standardized</span></label>
+          <label class="q-option"><input type="radio" name="ac4" value="3"><span>Inconsistent</span></label>
+          <label class="q-option"><input type="radio" name="ac4" value="4"><span>No standard process</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left">
+          <div class="q-label">Question 5</div>
+          <div class="q-text">How easy is it to see who is responsible for administrative tasks and their status?</div>
+        </div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="ac5" value="0"><span>Very Easy</span></label>
+          <label class="q-option"><input type="radio" name="ac5" value="1"><span>Easy</span></label>
+          <label class="q-option"><input type="radio" name="ac5" value="2"><span>Neutral</span></label>
+          <label class="q-option"><input type="radio" name="ac5" value="3"><span>Difficult</span></label>
+          <label class="q-option"><input type="radio" name="ac5" value="4"><span>Very Difficult</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left">
+          <div class="q-label">Question 6</div>
+          <div class="q-text">How often do administrative tasks interrupt revenue-generating or strategic work?</div>
+        </div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="ac6" value="0"><span>Never</span></label>
+          <label class="q-option"><input type="radio" name="ac6" value="1"><span>Rarely</span></label>
+          <label class="q-option"><input type="radio" name="ac6" value="2"><span>Sometimes</span></label>
+          <label class="q-option"><input type="radio" name="ac6" value="3"><span>Often</span></label>
+          <label class="q-option"><input type="radio" name="ac6" value="4"><span>Constantly</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-area">
+      <h3>🧩 Your Complexity Score</h3>
+      <div class="score-bar-wrap"><div class="score-bar" id="acBar" style="width:0%"><span id="acPct"></span></div></div>
+      <div class="score-label" id="acLabel">Answer all questions to see your complexity profile.</div>
+      <div class="score-result" id="acResult">Your personalized complexity profile will appear here once all questions are answered.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 3: DELEGATION STYLE ===== -->
+<div class="page" id="p3">
+  <div class="hero hero-3">
+    <div class="hero-text">
+      <h1>Delegation & <span>Communication Style</span></h1>
+      <p>Select the option that best reflects your typical approach to delegation and working with an assistant.</p>
+    </div>
+    <div class="hero-icon">
+      <svg viewBox="0 0 120 100" fill="none">
+        <circle cx="60" cy="50" r="38" stroke="#00b5ad" stroke-width="3" opacity=".3"/>
+        <circle cx="60" cy="50" r="25" stroke="#00b5ad" stroke-width="3" opacity=".5"/>
+        <circle cx="60" cy="50" r="12" fill="#00b5ad" opacity=".8"/>
+        <line x1="60" y1="12" x2="60" y2="88" stroke="#00b5ad" stroke-width="1.5" opacity=".4"/>
+        <line x1="22" y1="50" x2="98" y2="50" stroke="#00b5ad" stroke-width="1.5" opacity=".4"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">🤝 Delegation & Communication Style</div>
+    <div class="dark-section">
+      <div class="instr"><strong>Instructions</strong>Select the option that best reflects your typical approach.</div>
+
+      <div class="q-card">
+        <div class="q-left"><div class="q-label">Question 1</div><div class="q-text">When delegating administrative tasks, which best describes you?</div></div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="q1"><span>Do most myself</span></label>
+          <label class="q-option"><input type="radio" name="q1"><span>Occasionally, stay involved</span></label>
+          <label class="q-option"><input type="radio" name="q1"><span>Delegate regularly with checkpoints</span></label>
+          <label class="q-option"><input type="radio" name="q1"><span>Delegate fully</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left"><div class="q-label">Question 2</div><div class="q-text">When assigning tasks, you typically:</div></div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="q2"><span>Explain step-by-step</span></label>
+          <label class="q-option"><input type="radio" name="q2"><span>Give direction + examples</span></label>
+          <label class="q-option"><input type="radio" name="q2"><span>Provide outcome & let them decide</span></label>
+          <label class="q-option"><input type="radio" name="q2"><span>Assign fully independent</span></label>
+        </div>
+      </div>
+
+      <div class="q-card highlighted">
+        <div class="q-left"><div class="q-label">Question 3</div><div class="q-text">How often do you want updates on administrative tasks?</div></div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="q3"><span>Real-time</span></label>
+          <label class="q-option"><input type="radio" name="q3"><span>Daily</span></label>
+          <label class="q-option"><input type="radio" name="q3"><span>Few times per week</span></label>
+          <label class="q-option"><input type="radio" name="q3"><span>Weekly</span></label>
+          <label class="q-option"><input type="radio" name="q3"><span>Only if issue</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left"><div class="q-label">Question 4</div><div class="q-text">How do you prefer to receive updates or feedback?</div></div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="q4"><span>Written</span></label>
+          <label class="q-option"><input type="radio" name="q4"><span>Dashboard</span></label>
+          <label class="q-option"><input type="radio" name="q4"><span>Short check-in</span></label>
+          <label class="q-option"><input type="radio" name="q4"><span>Highlights only</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left"><div class="q-label">Question 5</div><div class="q-text">When processes change, you tend to:</div></div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="q5"><span>Resist</span></label>
+          <label class="q-option"><input type="radio" name="q5"><span>Welcome if saves time</span></label>
+          <label class="q-option"><input type="radio" name="q5"><span>Prefer gradual</span></label>
+          <label class="q-option"><input type="radio" name="q5"><span>Actively seek improvements</span></label>
+          <label class="q-option"><input type="radio" name="q5"><span>Adapt fairly quickly</span></label>
+        </div>
+      </div>
+
+      <div class="q-card">
+        <div class="q-left"><div class="q-label">Question 6</div><div class="q-text">For routine administrative decisions, you prefer to:</div></div>
+        <div class="q-right">
+          <label class="q-option"><input type="radio" name="q6"><span>Be involved</span></label>
+          <label class="q-option"><input type="radio" name="q6"><span>Approve final</span></label>
+          <label class="q-option"><input type="radio" name="q6"><span>Consult occasionally</span></label>
+          <label class="q-option"><input type="radio" name="q6"><span>Let others decide</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="score-area">
+      <h3>🎯 Your Delegation Style</h3>
+      <div class="score-bar-wrap"><div class="score-bar" id="delBar" style="width:0%"><span id="delPct"></span></div></div>
+      <div class="score-label" id="delLabel">Answer all questions to see your style profile.</div>
+      <div class="score-result" id="delResult">Your personalized profile will appear here once all questions are answered.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PAGE 4: DELEGATION READINESS ===== -->
+<div class="page" id="p4">
+  <div class="hero hero-4">
+    <div class="hero-text">
+      <h1>Delegation <span>Readiness</span> Assessment</h1>
+      <p>Rate each statement based on how accurately it reflects your current operations.</p>
+    </div>
+    <div class="hero-icon">
+      <svg viewBox="0 0 120 100" fill="none">
+        <rect x="10" y="70" width="14" height="22" rx="2" fill="#00b5ad" opacity=".4"/>
+        <rect x="30" y="55" width="14" height="37" rx="2" fill="#00b5ad" opacity=".55"/>
+        <rect x="50" y="38" width="14" height="54" rx="2" fill="#00b5ad" opacity=".7"/>
+        <rect x="70" y="22" width="14" height="70" rx="2" fill="#00b5ad" opacity=".85"/>
+        <rect x="90" y="10" width="14" height="82" rx="2" fill="#00b5ad"/>
+        <polyline points="17,71 37,56 57,39 77,23 97,11" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">✅ Delegation Readiness</div>
+    <div class="dark-section">
+      <div class="instr"><strong>Instructions</strong>Rate each statement based on how accurately it reflects your current operations.</div>
+      <div id="readinessStatements"></div>
+    </div>
+    <div class="score-area">
+      <h3>📈 Your Readiness Score</h3>
+      <div class="score-bar-wrap"><div class="score-bar" id="readBar" style="width:0%"><span id="readPct"></span></div></div>
+      <div class="score-label" id="readLabel">Answer all statements to see your readiness score.</div>
+      <div class="score-result" id="readResult">Your readiness profile will appear here once all statements are rated.</div>
+    </div>
+  </div>
+</div>
+
+<div class="cta">
+  <h2>Ready to reclaim your time?</h2>
+  <p>Let a Prialto managed assistant handle the admin work — so you can focus on what matters.</p>
+  <button class="cta-btn" onclick="alert('Contact form coming soon!')">Get My Free Consultation</button>
+</div>
+<footer>
+  <span>📞 <a href="tel:5038369499">(503) 836-9499</a></span>
+  <span>🌐 <a href="#">prialto.com</a></span>
+  <span>✉️ <a href="#">sales@prialto.com</a></span>
+  <span>🔗 <a href="#">linkedin.com/company/prialto</a></span>
+</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Math.round(n).toLocaleString();
+
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  $(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* CALC */
+function calc() {
+  const hrs = +$('adminHours').value, rate = +$('hourlyRate').value || 0;
+  const pct = parseInt($('reduction').value) / 100;
+  const monthly = hrs * 4.33 * rate, annual = monthly * 12 * pct;
+  $('monthlyCost').value = Math.round(monthly);
+  $('annualSavings').textContent = fmt(annual);
+  $('s-hours').textContent = hrs;
+  $('s-monthly').textContent = fmt(monthly);
+  $('s-annual').textContent = fmt(annual);
+  $('s-tasks').textContent = document.querySelectorAll('#p1 .check-item input:checked').length;
+}
+document.querySelectorAll('#p1 .check-item').forEach(item => {
+  item.addEventListener('change', () => { item.classList.toggle('checked', item.querySelector('input').checked); calc(); });
+});
+['adminHours','hourlyRate','reduction'].forEach(id => { $(id).addEventListener('input', calc); $(id).addEventListener('change', calc); });
+calc();
+
+/* ADMIN COMPLEXITY */
+function scoreComplexity() {
+  const names = ['ac1','ac2','ac3','ac4','ac5','ac6'];
+  const answered = names.filter(n => document.querySelector(`input[name="${n}"]:checked`)).length;
+  if (answered < names.length) return;
+  let score = 0, maxScore = 0;
+  const maxPerQ = [3,4,4,4,4,4];
+  names.forEach((n, i) => {
+    const sel = document.querySelector(`input[name="${n}"]:checked`);
+    if (sel) score += +sel.value;
+    maxScore += maxPerQ[i];
+  });
+  const pct = Math.round((score / maxScore) * 100);
+  $('acBar').style.width = pct + '%';
+  $('acPct').textContent = pct + '%';
+  let level, desc;
+  if (pct < 25) { level = 'Low Complexity'; desc = 'Your administrative environment is lean and streamlined. A Prialto assistant can help you maintain this efficiency while freeing up more of your time.'; }
+  else if (pct < 50) { level = 'Moderate Complexity'; desc = 'You have a manageable but growing admin load. A Prialto assistant can help reduce friction, standardize workflows, and prevent complexity from compounding.'; }
+  else if (pct < 75) { level = 'High Complexity'; desc = 'Your administrative environment shows significant complexity that is likely consuming valuable time and attention. A Prialto assistant can bring structure and relief quickly.'; }
+  else { level = 'Very High Complexity'; desc = 'Your admin environment is highly complex and is almost certainly impacting your strategic output. Prialto can make an immediate and significant difference.'; }
+  $('acLabel').textContent = `Complexity Score: ${pct}% — ${level}`;
+  $('acResult').innerHTML = `<strong>${level}:</strong> ${desc}`;
+}
+document.querySelectorAll('#p2 input[type=radio]').forEach(r => r.addEventListener('change', scoreComplexity));
+
+/* DELEGATION STYLE */
+function scoreDelegation() {
+  const answered = ['q1','q2','q3','q4','q5','q6'].filter(n => document.querySelector(`input[name="${n}"]:checked`)).length;
+  if (answered < 6) return;
+  let score = 0;
+  ['q1','q2','q3','q4','q5','q6'].forEach(n => {
+    document.querySelectorAll(`input[name="${n}"]`).forEach((o, i) => { if (o.checked) score += i; });
+  });
+  const maxScore = 20, pct = Math.round((score / maxScore) * 100);
+  $('delBar').style.width = pct + '%';
+  $('delPct').textContent = pct + '%';
+  let style, desc;
+  if (pct < 30) { style = 'Hands-On Director'; desc = 'You prefer to stay closely involved in administrative tasks and like detailed visibility. A Prialto assistant can help you systemize tasks while keeping you fully in control.'; }
+  else if (pct < 55) { style = 'Collaborative Delegator'; desc = 'You balance involvement with delegation. You appreciate checkpoints and clear communication. A Prialto assistant will work well with your structured approach.'; }
+  else if (pct < 80) { style = 'Strategic Delegator'; desc = 'You\'re comfortable delegating and prefer outcome-focused updates. A Prialto assistant can take on significant ownership with minimal hand-holding.'; }
+  else { style = 'Full Autonomy Leader'; desc = 'You excel at fully empowering others and trust them to deliver. A Prialto assistant will thrive with your leadership style and can operate with high independence.'; }
+  $('delLabel').textContent = `Autonomy Score: ${pct}% — ${style}`;
+  $('delResult').innerHTML = `<strong>${style}:</strong> ${desc}`;
+}
+document.querySelectorAll('#p3 input[type=radio]').forEach(r => r.addEventListener('change', scoreDelegation));
+
+/* READINESS */
+const statements = [
+  { id: 's1', label: 'Statement 1', text: 'Our administrative workflows are consistent and repeatable.' },
+  { id: 's2', label: 'Statement 2', text: 'Administrative tasks are well documented and easy for someone else to follow.' },
+  { id: 's3', label: 'Statement 3', text: 'Our administrative processes are supported by appropriate tools and systems.' },
+  { id: 's4', label: 'Statement 4', text: 'The expected outcomes for administrative tasks are clearly defined.' },
+  { id: 's5', label: 'Statement 5', text: 'We have successfully delegated administrative work in the past.' },
+  { id: 's6', label: 'Statement 6', text: 'We are ready to delegate administrative work within the next 90 days.' }
+];
+const sOpts = ['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'];
+const sc = $('readinessStatements');
+statements.forEach(s => {
+  const div = document.createElement('div');
+  div.className = 's-card';
+  div.innerHTML = `<div class="s-left"><div class="s-label">${s.label}</div><div class="s-text">${s.text}</div></div>
+    <div class="s-right">${sOpts.map((o,i) => `<label class="s-option"><input type="radio" name="${s.id}" value="${i}"><span>${o}</span></label>`).join('')}</div>`;
+  sc.appendChild(div);
+});
+function scoreReadiness() {
+  const answered = statements.filter(s => document.querySelector(`input[name="${s.id}"]:checked`)).length;
+  if (answered < statements.length) return;
+  let score = 0;
+  statements.forEach(s => { const sel = document.querySelector(`input[name="${s.id}"]:checked`); if (sel) score += +sel.value; });
+  const maxScore = 4 * statements.length, pct = Math.round((score / maxScore) * 100);
+  $('readBar').style.width = pct + '%';
+  $('readPct').textContent = pct + '%';
+  let level, desc;
+  if (pct < 30) { level = 'Early Stage'; desc = 'Your operations are still building the foundations for delegation. Prialto can help you establish consistent workflows and documentation as a starting point.'; }
+  else if (pct < 55) { level = 'Developing Readiness'; desc = 'You have some systems in place but gaps remain. Working with Prialto now can help accelerate your readiness while handling key admin tasks.'; }
+  else if (pct < 80) { level = 'Ready to Delegate'; desc = 'Your operations are well-positioned for delegation. A Prialto managed assistant can step in quickly and deliver value with minimal ramp-up.'; }
+  else { level = 'Highly Ready'; desc = 'Your processes are mature and delegation-ready. A Prialto assistant can integrate seamlessly and drive immediate impact across your admin operations.'; }
+  $('readLabel').textContent = `Readiness Score: ${pct}% — ${level}`;
+  $('readResult').innerHTML = `<strong>${level}:</strong> ${desc}`;
+}
+document.querySelectorAll('#p4 input[type=radio]').forEach(r => r.addEventListener('change', scoreReadiness));
+</script>
+</body>
+</html>
